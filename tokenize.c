@@ -81,19 +81,27 @@ Token *tokenize(char *p)
 
     while (*p)
     {
-        // 空白文字をスキップ
+        // whitespace
         if (isspace(*p))
         {
             p++;
             continue;
         }
 
+        // number
         if (isdigit(*p))
         {
             cur = cur->next = new_token(TK_NUM, p, p);
             char *q = p;
             cur->val = strtoul(p, &p, 10);
             cur->len = p - q;
+            continue;
+        }
+
+        if ('a' <= *p && *p <= 'z')
+        {
+            cur = cur->next = new_token(TK_IDENT, p, p + 1);
+            p++;
             continue;
         }
 

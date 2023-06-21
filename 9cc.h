@@ -9,6 +9,7 @@
 // tokenize.c
 typedef enum
 {
+    TK_IDENT,
     TK_PUNCT,
     TK_NUM,
     TK_EOF,
@@ -34,24 +35,29 @@ Token *tokenize(char *input);
 // parse.c
 typedef enum
 {
-    ND_ADD, // +
-    ND_SUB, // -
-    ND_MUL, // *
-    ND_DIV, // /
-    ND_NEG, // unary -
-    ND_EQ,  // ==
-    ND_NE,  // !=
-    ND_LT,  // <
-    ND_LE,  // <=
-    ND_NUM, // integer
+    ND_ADD,       // +
+    ND_SUB,       // -
+    ND_MUL,       // *
+    ND_DIV,       // /
+    ND_NEG,       // unary -
+    ND_EQ,        // ==
+    ND_NE,        // !=
+    ND_LT,        // <
+    ND_LE,        // <=
+    ND_ASSIGN,    // =
+    ND_EXPR_STMT, // Expression statement
+    ND_VAR,       // Variable
+    ND_NUM,       // Integer
 } NodeKind;
 
 typedef struct Node Node;
 struct Node
 {
     NodeKind kind;
+    Node *next;
     Node *lhs;
     Node *rhs;
+    char name;
     int val;
 };
 

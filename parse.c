@@ -1,6 +1,8 @@
 #include "9cc.h"
 
 static Node *expr(Token **rest, Token *tok);
+static Node *expr_stmt(Token **rest, Token *tok);
+static Node *assign(Token **rest, Token *tok);
 static Node *equality(Token **rest, Token *tok);
 static Node *relational(Token **rest, Token *tok);
 static Node *add(Token **rest, Token *tok);
@@ -41,9 +43,38 @@ static Node *new_num(int val)
     return node;
 }
 
+static Node *new_var_node(char name)
+{
+    Node *node = new_node(ND_VAR);
+    node->name = name;
+    return node;
+}
+
+static Node *stmt(Token **rest, Token *tok)
+{
+    return expr_stmt(rest, tok);
+}
+
 static Node *expr(Token **rest, Token *tok)
 {
-    return equality(rest, tok);
+    return assign(rest, tok);
+}
+
+static Node *expr_stmt(Token **rest, Token *tok)
+{
+    Node *node = new_unary(ND_EXPR_STMT, expr(&tok, tok));
+    *rest = skip(tok, ";");
+    return node;
+}
+
+static Node *assign(Token **rest, Token *tok)
+{
+    Node *node = equality(&tok, tok);
+    if (equal(tok, "="))
+        node = new_binary(ND_ASSIGN, node, assign(&tok, tok->next));
+
+    *rest = tok;
+    return node;
 }
 
 static Node *equality(Token **rest, Token *tok)
@@ -171,6 +202,13 @@ static Node *primary(Token **rest, Token *tok)
         return node;
     }
 
+    if (tok->kind == TK_IDENT)
+    {
+        Node *node = new_var_node(*tok->loc);
+        *rest = tok->next;
+        return node;
+    }
+
     if (tok->kind == TK_NUM)
     {
         Node *node = new_num(tok->val);
@@ -184,9 +222,11 @@ static Node *primary(Token **rest, Token *tok)
 
 Node *parse(Token *tok)
 {
-    Node *node = expr(&tok, tok);
-    if (tok->kind != TK_EOF)
-        error_tok(tok, "extra token");
+    Node head = {};
+    Node *cur = &head;
 
-    return node;
+    while (tok->kind != TK_EOF)
+        cur = cur->next = stmt(&tok, tok);
+
+    return head.next;
 }
