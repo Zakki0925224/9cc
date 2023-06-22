@@ -75,6 +75,13 @@ static Obj *new_lvar(char *name)
 
 static Node *stmt(Token **rest, Token *tok)
 {
+    if (equal(tok, "return"))
+    {
+        Node *node = new_unary(ND_RETURN, expr(&tok, tok->next));
+        *rest = skip(tok, ";");
+        return node;
+    }
+
     return expr_stmt(rest, tok);
 }
 
