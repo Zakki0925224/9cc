@@ -108,6 +108,12 @@ static void gen_stmt(Node *node)
     case ND_EXPR_STMT:
         gen_expr(node->lhs);
         return;
+
+    case ND_BLOCK:
+        for (Node *n = node->body; n; n = n->next)
+            gen_stmt(n);
+
+        return;
     }
 
     error("invalid statement");
@@ -136,11 +142,8 @@ void codegen(Function *prog)
     printf("    mov %%rsp, %%rbp\n");
     printf("    sub $%d, %%rsp\n", prog->stack_size);
 
-    for (Node *n = prog->body; n; n = n->next)
-    {
-        gen_stmt(n);
-        assert(depth == 0);
-    }
+    gen_stmt(prog->body);
+    assert(depth == 0);
 
     printf(".L.return:\n"); // return label
     printf("    mov %%rbp, %%rsp\n");

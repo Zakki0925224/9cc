@@ -69,6 +69,7 @@ typedef enum
     ND_VAR,       // Variable
     ND_NUM,       // Integer
     ND_RETURN,    // "return"
+    ND_BLOCK,     // { ... }
 } NodeKind;
 
 struct Node
@@ -77,6 +78,7 @@ struct Node
     Node *next;
     Node *lhs;
     Node *rhs;
+    Node *body; // block
     Obj *var;
     int val;
 };
